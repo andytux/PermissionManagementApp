@@ -1,0 +1,69 @@
+﻿@page "/assigneUserPermissions"
+
+@inject UserPermissionService UserPermissionService
+@inject UserService UserService
+@inject PermissionService PermissionService
+
+<h3>AssignUserPermissions</h3>
+
+<select @bind="selectedUserId">
+	<option value="">Choose user</option>
+	@foreach(var user in users)
+	{
+		<option value="@user.Id">@user.Name</option>
+	}
+</select>
+
+<select @bind="selectedPermissionId" >
+	<option value="">Choose permission</option>
+	@foreach(var permission in permissions)
+	{
+		<option value="@permission.Id">@permission.Name</option>
+	}
+</select>
+
+<button @onclick="AssignPermission">Assign</button>
+
+@if(userPermissions != null)
+{
+	<h4>Current permissions</h4>
+	<ul>
+		@foreach(var permission in userPermissions)
+		{
+			<li>@permission.Name 
+				<button @onclick="()=> RemovePermission(permission.Id)">Delete</button>
+			</li>
+		}
+	</ul>
+}
+
+@code {
+	private List<User> users = new();
+	private List<Permission> permissions = new();
+	private List<Permission> userPermissions = new();
+
+	private int selectedUserId;
+	private int selectedPermissionId;
+
+	protected override async Task OnInitialized()
+	{
+		users = await UserService.GetAllUsersAsync();
+		permissions = await PermissionService.GetAllPermissionsAsync();
+	}
+
+	private async Task AssignPermission()
+	{
+		if (selectedPermissionId != 0 || selectedUserId != 0)
+		{
+			await UserPermissionService.AssignPermissionToUserAsync(selectedUserId, selectedPermissionId);
+			userPermissions = await UserPermissionService.GetUserPermissionsAsync(selectedUserId);
+		}
+	}
+
+	private async Task RemovePermission(int permissionId)
+	{
+		await UserPermissionService.RemovePermissionFromUserAsync(selectedUserId, permissionId);
+		userPermissions = await UserPermissionService.GetUserPermissionsAsync(selectedUserId);
+	}
+
+}
