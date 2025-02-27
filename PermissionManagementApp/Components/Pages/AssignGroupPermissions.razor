@@ -1,0 +1,68 @@
+﻿@page "/assignGroupPermissions"
+
+@inject GroupService GroupService
+@inject PermissionService PermissionService
+@inject GroupPermissionService GroupPermissionService
+
+
+<h3>AssignGroupPermissions</h3>
+
+<select @bind="selectedGroupId">
+	<option value="">Choose group</option>
+	@foreach(var group in groups)
+	{
+		<option value="@group.Id">@group.Name</option>
+	}
+</select>
+
+<select @bind="selectedPermissionId">
+	<option value="">Choose permission</option>
+	@foreach(var permission in permissions)
+	{
+		<option value="@permission.Id">@permission.Name</option>
+	}
+</select>
+
+<button @onclick="AssignPermission" >Assign</button>
+
+@if (selectedGroupId != 0 || selectedPermissionId != 0)
+{
+	<h4>Current permissions</h4>
+	<ul>
+		@foreach(var permission in groupPermissions)
+		{
+			<li>@permission.Name 
+				<button @onclick="() => RemovePermission(permission.Id)">Delete</button>
+			</li>
+		}
+	</ul>
+}
+
+
+@code {
+	private List<Group> groups = new();
+	private List<Permission> permissions = new();
+	private List<Permission> groupPermissions = new();
+
+	private int selectedGroupId;
+	private int selectedPermissionId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		groups = await GroupService.GetAllGroupsAsync();
+		permissions = await PermissionService.GetAllPermissionsAsync();
+	}
+
+	private async Task AssignPermission()
+	{
+		await GroupPermissionService.AssignPermissionToGroupAsync(selectedGroupId, selectedPermissionId);
+		groupPermissions = await GroupPermissionService.GetGroupPermissionsAsync(selectedGroupId);
+	}
+
+	private async Task RemovePermission(int permissionId)
+	{
+		await GroupPermissionService.RemovePermissionFromGroupAsync(permissionId);
+		groupPermissions = await GroupPermissionService.GetGroupPermissionsAsync(selectedGroupId);
+	}
+
+}
