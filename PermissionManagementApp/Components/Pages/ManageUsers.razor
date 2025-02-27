@@ -1,0 +1,52 @@
+﻿@page "/manageUsers"
+
+@inject UserService UserService
+
+<h3>ManageUsers</h3>
+
+<input @bind="newUserName" placeholder="Enter new username here" />
+<button @onclick="AddUser">Add user</button>
+
+@if (users != null)
+{
+	<ul>
+		@foreach (var user in users)
+		{
+			<li>
+				@user.Name <button @onclick="() => DeleteUser(user.Id)">Delete user</button>
+			</li>
+		}
+	</ul>
+}
+
+@code {
+	private List<User> users;
+	private string newUserName;
+
+	protected override async Task OnInitializedAsync()
+	{
+		users = await UserService.GetAllUsersAsync();
+	}
+
+	private async Task AddUser()
+	{
+		if (!string.IsNullOrEmpty(newUserName))
+		{
+			var user = new User
+				{
+					Name = newUserName
+				};
+
+			await UserService.AddUserAsync(user);
+			users = await UserService.GetAllUsersAsync();
+			newUserName = string.Empty;
+		}
+	}
+
+	private async Task DeleteUser(int id)
+	{
+		await UserService.DeleteUserAsync(id);
+		users = await UserService.GetAllUsersAsync();
+	}
+
+}
