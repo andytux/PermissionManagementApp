@@ -13,6 +13,7 @@ builder.Services.AddScoped<GroupService>();
 builder.Services.AddScoped<PermissionService>();
 builder.Services.AddScoped<UserPermissionService>();
 builder.Services.AddScoped<GroupPermissionService>();
+builder.Services.AddScoped<RoleService>();
 
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
