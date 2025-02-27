@@ -11,6 +11,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GroupService>();
 builder.Services.AddScoped<PermissionService>();
+builder.Services.AddScoped<UserPermissionService>();
+builder.Services.AddScoped<GroupPermissionService>();
 
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
