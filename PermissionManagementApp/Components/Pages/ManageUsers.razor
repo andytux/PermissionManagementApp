@@ -3,23 +3,26 @@
 @inject UserService UserService
 
 <h3>ManageUsers</h3>
+	<input @bind="newUserName" placeholder="Enter new username here" />
+	<button @onclick="AddUser">Add user</button>
 
-<input @bind="newUserName" placeholder="Enter new username here" />
-<button @onclick="AddUser">Add user</button>
+	@if (users != null)
+	{
+		<ul>
+			@foreach (var user in users)
+			{
+				<li>
+					@user.Name
 
-@if (users != null)
-{
-	<ul>
-		@foreach (var user in users)
-		{
-			<li>
-				@user.Name <button @onclick="() => DeleteUser(user.Id)">Delete user</button>
-			</li>
-		}
-	</ul>
-}
+						<button @onclick="() => DeleteUser(user.Id)">Delete user</button>
+				</li>
+			}
+		</ul>
+	}
 
 @code {
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
 	private List<User> users;
 	private string newUserName;
 

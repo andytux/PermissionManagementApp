@@ -1,0 +1,32 @@
+﻿@inject AuthService AuthService
+@inject RoleService RoleService
+
+@if (hasPermission && ChildContent != null)
+{
+	@ChildContent
+}
+else
+{
+	<ProtectedPage></ProtectedPage>
+}
+
+@code {
+	[Parameter]
+	public string Permission { get; set; }
+
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
+
+	private bool hasPermission = false;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		var userId = AuthService.GetCurrentUserId();
+
+		if (userId.HasValue)
+		{
+			hasPermission = await RoleService.HasPermissionAsync(userId.Value, Permission);
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+}

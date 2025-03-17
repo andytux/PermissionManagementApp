@@ -1,48 +1,55 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">PermissionManagementApp</a>
-    </div>
+	<div class="container-fluid">
+		<a class="navbar-brand" href="">PermissionManagementApp</a>
+	</div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+	<nav class="flex-column">
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+				<span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+			</NavLink>
+		</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="/manageUsers">
+				<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Users
+			</NavLink>
+		</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="/manageGroups">
+				<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Groups
+			</NavLink>
+		</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/manageUsers">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Users
-            </NavLink>
-        </div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="/managePermissions">
+				<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Permissions
+			</NavLink>
+		</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/manageGroups">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Groups
-            </NavLink>
-        </div>
+		<div>
+			<NavLink class="nav-link" href="/assignUserPermissions">
+				<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Assign userpermissions
+			</NavLink>
+		</div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/managePermissions">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Permissions
-            </NavLink>
-        </div>
-    </nav>
+		<div>
+			<NavLink class="nav-link" href="/assignGroupPermissions">
+				<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Assign grouppermissions
+			</NavLink>
+		</div>
+
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="/assignUserGroups">
+				<span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Assign user to groups
+			</NavLink>
+		</div>
+
+	</nav>
 </div>
 

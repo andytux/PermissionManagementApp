@@ -1,0 +1,34 @@
+﻿@page "/login"
+
+@inject AuthService AuthService
+@inject NavigationManager NavManager
+
+
+<h3>Login</h3>
+
+<input @bind="userName" placeholder="Enter username here" />
+<button @onclick="LoginWithRole">Login</button>
+
+@if (loginFailed)
+{
+	<p style="color:red;">Login failed! User does not exist.</p>
+}
+
+@code {
+	private string userName = string.Empty;
+	private bool loginFailed = false;
+
+	private async Task LoginWithRole()
+	{
+		if (await AuthService.LoginAsync(userName))
+		{
+			NavManager.NavigateTo("/");
+		}
+		else
+		{
+			loginFailed = true;
+		}
+	}
+
+
+}

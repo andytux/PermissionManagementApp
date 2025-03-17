@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
 using PermissionManagementApp.Data;
 using PermissionManagementApp.Data.Models;
 
@@ -15,21 +16,36 @@ namespace PermissionManagementApp.Services
 
 		public async Task<List<Permission>> GetUserPermissionsAsync(int userId)
 		{
-			var userPermission = await dbContext.UserPermissions
-				.Where(up => up.UserId == userId)
-				.Select(up => up.Permission)
-				.ToListAsync();
+			var dbCon = dbContext;
+			try
+			{
+				var userPermission = await dbCon.UserPermissions.AsNoTracking()
+					.Where(up => up.UserId == userId)
+					.Select(up => up.Permission)
+					.ToListAsync();
 
-			var groupPermission = await dbContext.UserGroups
-				.Where(ug => ug.UserId == userId)
-				.SelectMany(ug => dbContext.GroupPermissions.Where(gp => gp.GroupId == ug.GroupId).Select(gp => gp.Permission))
-				.ToListAsync();
+				await Task.Delay(1000);
+
+				var groupPermission = await dbCon.UserGroups
+					.AsNoTracking ()
+					.Where(ug => ug.UserId == userId)
+					.SelectMany(ug => dbContext.GroupPermissions.Where(gp => gp.GroupId == ug.GroupId)
+					.Select(gp => gp.Permission)).AsNoTracking ()
+					.ToListAsync();
+
+				return userPermission.Concat(groupPermission).Distinct().ToList();
+			}
+			catch (Exception ex)
+			{
+				return new List<Permission>();
+			}
+
 		}
 
 		public async Task<bool> HasPermissionAsync(int userId, string permissionName)
 		{
 			var permissions = await GetUserPermissionsAsync(userId);
-			return permissions.Any(p=> p.Name == permissionName);
+			return permissions.Any(p => p.Name == permissionName);
 		}
 	}
 }

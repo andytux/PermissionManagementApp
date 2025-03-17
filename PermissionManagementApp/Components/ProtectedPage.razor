@@ -1,0 +1,27 @@
+﻿@inject AuthService AuthService
+@inject NavigationManager NavManager
+
+@if(AuthService.GetCurrentUser() != null)
+{
+	<p>Logged in as: @AuthService.GetCurrentUser().Name</p>
+	<button class="btn btn-secondary mb-5" @onclick="Logout">Logout</button>
+
+	@ChildContent
+}
+else
+{
+	<NavLink href="/login">Login</NavLink>
+}
+
+
+
+@code {
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
+
+	private void Logout()
+	{
+		AuthService.Logout();
+		NavManager.NavigateTo("/login");
+	}
+}

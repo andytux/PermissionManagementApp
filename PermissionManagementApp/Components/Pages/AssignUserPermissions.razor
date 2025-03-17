@@ -1,4 +1,4 @@
-﻿@page "/assigneUserPermissions"
+﻿@page "/assignUserPermissions"
 
 @inject UserPermissionService UserPermissionService
 @inject UserService UserService
@@ -6,17 +6,17 @@
 
 <h3>AssignUserPermissions</h3>
 
-<select @bind="selectedUserId">
-	<option value="">Choose user</option>
-	@foreach(var user in users)
+<select @bind="selectedUserId" @bind:event="onchange">
+	<option value="">Benutzer auswählen</option>
+	@foreach (var user in users)
 	{
 		<option value="@user.Id">@user.Name</option>
 	}
 </select>
 
-<select @bind="selectedPermissionId" >
+<select @bind="selectedPermissionId">
 	<option value="">Choose permission</option>
-	@foreach(var permission in permissions)
+	@foreach (var permission in permissions)
 	{
 		<option value="@permission.Id">@permission.Name</option>
 	}
@@ -24,13 +24,14 @@
 
 <button @onclick="AssignPermission">Assign</button>
 
-@if(userPermissions != null)
+@if (userPermissions != null)
 {
 	<h4>Current permissions</h4>
 	<ul>
-		@foreach(var permission in userPermissions)
+		@foreach (var permission in userPermissions)
 		{
-			<li>@permission.Name 
+			<li>
+				@permission.Name
 				<button @onclick="()=> RemovePermission(permission.Id)">Delete</button>
 			</li>
 		}
@@ -42,10 +43,20 @@
 	private List<Permission> permissions = new();
 	private List<Permission> userPermissions = new();
 
-	private int selectedUserId;
+	private int _selectedUserId;
 	private int selectedPermissionId;
 
-	protected override async Task OnInitialized()
+	private int selectedUserId
+	{
+		get => _selectedUserId;
+		set
+		{
+			_selectedUserId = value;
+			LoadUserPermissions();
+		}
+	}
+
+	protected override async Task OnInitializedAsync()
 	{
 		users = await UserService.GetAllUsersAsync();
 		permissions = await PermissionService.GetAllPermissionsAsync();
@@ -64,6 +75,15 @@
 	{
 		await UserPermissionService.RemovePermissionFromUserAsync(selectedUserId, permissionId);
 		userPermissions = await UserPermissionService.GetUserPermissionsAsync(selectedUserId);
+	}
+
+	private async Task LoadUserPermissions()
+	{
+		if (selectedUserId != 0)
+		{
+			userPermissions = await UserPermissionService.GetUserPermissionsAsync(selectedUserId);
+			StateHasChanged();
+		}
 	}
 
 }

@@ -61,7 +61,7 @@
 
 	private async Task RemovePermission(int permissionId)
 	{
-		await GroupPermissionService.RemovePermissionFromGroupAsync(permissionId);
+		await GroupPermissionService.RemovePermissionFromGroupAsync(selectedGroupId, permissionId);
 		groupPermissions = await GroupPermissionService.GetGroupPermissionsAsync(selectedGroupId);
 	}
 

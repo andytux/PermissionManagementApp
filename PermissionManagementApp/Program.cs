@@ -6,7 +6,7 @@ using PermissionManagementApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped);
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GroupService>();
@@ -15,6 +15,7 @@ builder.Services.AddScoped<UserPermissionService>();
 builder.Services.AddScoped<GroupPermissionService>();
 builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserGroupService>();
 
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
