@@ -47,5 +47,67 @@ namespace PermissionManagementApp.Services
 			var permissions = await GetUserPermissionsAsync(userId);
 			return permissions.Any(p => p.Name == permissionName);
 		}
-	}
+
+        public async Task<List<Permission>> GetUserPermissionsRecursiveAsync(int userId)
+        {
+            var visitedGroupIds = new HashSet<int>();
+            var permissions = new List<Permission>();
+
+            // 1. Direkte User-Permissions
+            var userPermissions = await dbContext.UserPermissions
+                .Where(up => up.UserId == userId)
+                .Select(up => up.Permission)
+                .ToListAsync();
+
+            permissions.AddRange(userPermissions);
+
+            // 2. Starte mit den direkten Gruppen des Users
+            var directGroupIds = await dbContext.UserGroups
+                .Where(ug => ug.UserId == userId)
+                .Select(ug => ug.GroupId)
+                .ToListAsync();
+
+            // 3. Rekursiv alle Gruppen und deren Permissions aufbauen
+            var allGroupIds = await GetAllNestedGroupIdsAsync(directGroupIds, visitedGroupIds);
+
+            if (allGroupIds.Count > 0)
+            {
+                var groupPermissions = await dbContext.GroupPermissions
+                    .Where(gp => allGroupIds.Contains(gp.GroupId))
+                    .Select(gp => gp.Permission)
+                    .ToListAsync();
+
+                permissions.AddRange(groupPermissions);
+            }
+
+            // 4. Duplikate entfernen (Permissions mit gleicher ID)
+            return permissions
+                .GroupBy(p => p.Id)
+                .Select(g => g.First())
+                .ToList();
+        }
+
+        private async Task<List<int>> GetAllNestedGroupIdsAsync(List<int> currentGroupIds, HashSet<int> visited)
+        {
+            var allGroups = new List<int>();
+
+            foreach (var groupId in currentGroupIds)
+            {
+                if (!visited.Add(groupId)) continue;
+
+                allGroups.Add(groupId);
+
+                var childGroupIds = await dbContext.Set<GroupGroup>()
+                    .Where(gg => gg.ParentGroupId == groupId)
+                    .Select(gg => gg.ChildGroupId)
+                    .ToListAsync();
+
+                var nested = await GetAllNestedGroupIdsAsync(childGroupIds, visited);
+                allGroups.AddRange(nested);
+            }
+
+            return allGroups.Distinct().ToList();
+        }
+
+    }
 }
