@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Models\ViewModels\" />
+    <Folder Include="Doku\" />
   </ItemGroup>
 
 </Project>

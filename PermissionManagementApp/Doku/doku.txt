@@ -1,0 +1,85 @@
+Dokumentation: PermissionManagementApp
+1. Einleitung
+	Die Anwendung 'PermissionManagementApp' ist eine rollenbasierte Berechtigungsverwaltungssoftware, die es ermöglicht, Benutzer, Gruppen, Rechte und deren Zuweisungen zu verwalten. Die Anwendung basiert auf ASP.NET Core Blazor Server mit Entity Framework Core zur Datenpersistenz.
+2. Architektur und Komponenten
+	Die Anwendung besteht aus mehreren Kernmodulen:
+		•	- Benutzerverwaltung (User)
+		•	- Gruppenverwaltung (Group, GroupGroup)
+		•	- Rechteverwaltung (Permission)
+		•	- Rollenverwaltung (RoleService, rekursive Rechte)
+		•	- Authentifizierung (AuthService, AuthStateService)
+		•	- Autorisierungs-Komponenten für das UI (AuthView, ProtectedPage)
+3. Datenmodell
+	Das Datenmodell basiert auf mehreren Entitäten mit folgenden Beziehungen:
+		•	- Ein User kann mehreren Gruppen zugeordnet sein (UserGroup).
+		•	- Eine Gruppe kann mehreren Berechtigungen zugeordnet sein (GroupPermission).
+		•	- Eine Gruppe kann hierarchisch anderen Gruppen zugeordnet sein (GroupGroup).
+		•	- Berechtigungen können direkt einem User oder einer Gruppe zugewiesen werden.
+4. Funktionalitäten
+		•	- Benutzer hinzufügen, bearbeiten, löschen
+		•	- Gruppen hinzufügen, löschen und hierarchisch verknüpfen
+		•	- Berechtigungen hinzufügen, löschen und Benutzern oder Gruppen zuweisen
+		•	- Benutzerrechte werden rekursiv über Gruppenbeziehungen ausgewertet
+5. Testfälle
+	•	Testfälle zur Sicherstellung der Funktionalität:
+			1. Benutzer anlegen und abrufen
+			2. Gruppe anlegen und Benutzer zuordnen
+			3. Berechtigung an Gruppe zuweisen und Benutzerberechtigung prüfen
+			4. Hierarchie von Gruppen aufbauen und rekursive Rechteauswertung testen
+			5. Rechteentzug (direkt und via Gruppe) validieren
+			6. Zugriff auf Komponenten via 'AuthView' abhängig von Rechten testen
+7. Erweiterte Beschreibung der Anwendung
+	Die PermissionManagementApp ist ein rollenbasiertes Berechtigungssystem für Benutzer, Gruppen und Berechtigungen in einer Blazor-basierten Webanwendung. Ziel ist es, eine granulare Zugriffskontrolle zu ermöglichen, indem Benutzer direkt oder indirekt (über Gruppen) Berechtigungen erhalten können.
+
+	Das System berücksichtigt folgende Aspekte:
+		• Benutzer können mehreren Gruppen angehören.
+		• Gruppen können hierarchisch verschachtelt sein.
+		• Berechtigungen können sowohl direkt an Benutzer als auch an Gruppen vergeben werden.
+		• Das System ermittelt auch rekursiv vererbte Rechte über Gruppenzugehörigkeiten.
+8. Besondere Funktionalitäten
+	• Rekursive Rechtevererbung über verschachtelte Gruppen
+	• Autorisierungs-Komponente für bedingte Anzeige von Inhalten auf Basis von Rollen
+	• Seed-Funktion zum automatischen Anlegen eines ADMIN-Benutzers mit allen Rechten
+9. Sicherheit und Best Practices
+	• Sitzungsbasierte Authentifizierung mit SessionStorage
+	• Rollenbasierte Autorisierung durch die Komponente <AuthView>
+	• GUID-basierter Benutzer-Login (als Platzhalter für spätere Authentifizierungsmechanismen)
+
+
+10. Tests
+	3. Testfälle
+		3.1 Benutzer anlegen
+			Voraussetzungen: Keine
+			Schritte:
+			1.	1. Navigation zu 'Benutzerverwaltung'
+			2. Eingabe eines neuen Benutzernamens
+			3. Klick auf 'Anlegen'
+			Erwartetes Ergebnis: Neuer Benutzer wird in die Liste aufgenommen und in der Datenbank gespeichert.
+		3.2 Berechtigung zuweisen
+			Voraussetzungen: Es existieren Benutzer und Berechtigungen
+			Schritte:
+			2.	1. Navigation zu 'Permissionmanagement'
+			2. Auswahl eines Benutzers und einer Berechtigung
+			3. Klick auf 'Zuweisen'
+			Erwartetes Ergebnis: Die Berechtigung wird dem Benutzer korrekt zugewiesen.
+		3.3 Gruppenverknüpfung erstellen
+			Voraussetzungen: Zwei Gruppen existieren
+			Schritte:
+			3.	1. Navigation zu 'GroupsManagement'
+			2. Auswahl übergeordneter und untergeordneter Gruppe
+			3. Klick auf 'Verknüpfen'
+			Erwartetes Ergebnis: Gruppenbeziehung wird in der DB gespeichert und in der UI dargestellt.
+		3.4 AuthView-Komponente
+			Voraussetzungen: Benutzer mit/ohne entsprechender Berechtigung ist eingeloggt
+			Schritte:
+			4.	1. Login mit Benutzer
+			2. Navigation zu Seite mit AuthView-Komponente
+			Erwartetes Ergebnis: Inhalte werden nur angezeigt, wenn Benutzer die benötigte Berechtigung hat.
+		3.5 Benutzer löschen
+			Voraussetzungen: Benutzer existiert
+			Schritte:
+			5.	1. Navigation zu 'Benutzerverwaltung'
+			2. Klick auf 'Löschen' bei einem Benutzer
+			Erwartetes Ergebnis: Benutzer wird aus der Liste entfernt und aus der Datenbank gelöscht.
+		4. Fazit
+		Die Anwendung wurde erfolgreich anhand der funktionalen Anforderungen getestet. Alle Kernfunktionen wie Benutzer- und Berechtigungsmanagement sowie die rollenbasierte Zugriffskontrolle über die AuthView-Komponente arbeiten zuverlässig.

@@ -3,9 +3,6 @@
 
 @if(AuthService.GetCurrentUser() != null)
 {
-	<p>Logged in as: @AuthService.GetCurrentUser().Name</p>
-	<button class="btn btn-secondary mb-5" @onclick="Logout">Logout</button>
-
 	@ChildContent
 }
 else

@@ -43,6 +43,7 @@ namespace PermissionManagementApp.Data
 
             modelBuilder.Entity<UserPermission>()
                 .HasIndex(up => new { up.UserId, up.PermissionId }).IsUnique();
+
         }
     }
 }

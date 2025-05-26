@@ -15,12 +15,21 @@ builder.Services.AddScoped<UserPermissionService>();
 builder.Services.AddScoped<GroupPermissionService>();
 builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddScoped<UserGroupService>();
+builder.Services.AddScoped<GroupGroupService>();
+builder.Services.AddScoped<DataSeeder>();
 
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await seeder.SeedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

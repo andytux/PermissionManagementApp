@@ -28,7 +28,7 @@
 
             if (await AuthService.LoginAsync(userName))
             {
-                await AuthStateService.Login(user.Name, user.Id);
+                await AuthStateService.LoginAsync(user.Name, user.Id);
 
         NavManager.NavigateTo("/");
             }

@@ -29,3 +29,4 @@ namespace PermissionManagementApp.Services
 		public int? GetCurrentUserId() => currentUser?.Id;
 	}
 }
+

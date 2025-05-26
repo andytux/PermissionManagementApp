@@ -1,0 +1,20 @@
+﻿@code {
+    [Parameter] public Group Group { get; set; }
+    [Parameter] public List<GroupNodeModel> Children { get; set; }
+}
+
+<div style="margin-left: 20px; padding:5px;">
+    <strong>@Group.Name</strong>
+
+    @if (Children != null && Children.Any())
+    {
+        <ul>
+            @foreach (var child in Children)
+            {
+                <li>
+                    <GroupNode Group="child.Group" Children="child.Children" />
+                </li>
+            }
+        </ul>
+    }
+</div>

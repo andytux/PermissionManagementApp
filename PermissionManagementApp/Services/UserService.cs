@@ -23,10 +23,27 @@ namespace PermissionManagementApp.Services
 			return await dbContext.Users.Include(u=> u.UserGroups).FirstOrDefaultAsync(u=> u.Id == id);
 		}
 
-		public async Task AddUserAsync(User user)
+		public async Task AddOrEditUserAsync(User user)
 		{
+			if(user.Id == 0)
+			{
+
 			await dbContext.Users.AddAsync(user);
+			}
+			else
+			{
+				var userToEdit = await GetUserByIdAsync(user.Id);
+				if(userToEdit != null)
+				{
+					userToEdit.Name = user.Name;
+				}
+			}
 			await dbContext.SaveChangesAsync();
+		}
+
+		public async Task<User?> GetUserByNameAsync(string userName)
+		{
+			return await dbContext.Users.FirstOrDefaultAsync(u=> u.Name == userName);
 		}
 
 		public async Task DeleteUserAsync(int userId)

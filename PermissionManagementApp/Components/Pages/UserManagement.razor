@@ -38,37 +38,37 @@ else
                 </tr>
             </thead>
             <tbody>
-                                <AuthView Permission="Admin, Usermanager">
-                @foreach (var user in users)
-                {
-                    <tr>
-                        <td>@user.Id</td>
-                        <td>
-                            @if (editUserId == user.Id)
-                            {
-                                <input @bind="editUserName" class="form-control" />
-                            }
-                            else
-                            {
-                                @user.Name
-                            }
-                        </td>
-                        <td>
-                            @if (editUserId == user.Id)
-                            {
-                                <button class="btn btn-success btn-sm me-1" @onclick="()=> SaveEdit(user.Id)">Speichern</button>
-                                <button class="btn btn-secondary btn-sm" @onclick="CancelEdit">Abbrechen</button>
-                            }
-                            else
-                            {
+                <AuthView Permission="Admin, Usermanager">
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>
+                                @if (editUserId == user.Id)
+                                {
+                                    <input @bind="editUserName" class="form-control" />
+                                }
+                                else
+                                {
+                                    @user.Name
+                                }
+                            </td>
+                            <td>
+                                @if (editUserId == user.Id)
+                                {
+                                    <button class="btn btn-success btn-sm me-1" @onclick="()=> SaveEdit(user.Id)">Speichern</button>
+                                    <button class="btn btn-secondary btn-sm" @onclick="CancelEdit">Abbrechen</button>
+                                }
+                                else
+                                {
                                     <button class="btn btn-sm btn-info" @onclick="()=> ShowDetails(user.Id)">Details</button>
                                     <button class="btn btn-sm btn-primary" @onclick="()=> BeginEdit(user)">Bearbeiten</button>
                                     <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Löschen</button>
-                            }
-                        </td>
-                    </tr>
-                }
-                                </AuthView>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </AuthView>
             </tbody>
         </table>
     </div>
