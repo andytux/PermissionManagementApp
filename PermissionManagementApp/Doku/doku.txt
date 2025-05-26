@@ -82,4 +82,4 @@ Dokumentation: PermissionManagementApp
 			2. Klick auf 'Löschen' bei einem Benutzer
 			Erwartetes Ergebnis: Benutzer wird aus der Liste entfernt und aus der Datenbank gelöscht.
 		4. Fazit
-		Die Anwendung wurde erfolgreich anhand der funktionalen Anforderungen getestet. Alle Kernfunktionen wie Benutzer- und Berechtigungsmanagement sowie die rollenbasierte Zugriffskontrolle über die AuthView-Komponente arbeiten zuverlässig.
+			Die Anwendung wurde erfolgreich anhand der funktionalen Anforderungen getestet. Alle Kernfunktionen wie Benutzer- und Berechtigungsmanagement sowie die rollenbasierte Zugriffskontrolle über die AuthView-Komponente arbeiten zuverlässig.
