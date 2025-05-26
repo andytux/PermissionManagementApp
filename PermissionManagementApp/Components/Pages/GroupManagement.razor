@@ -1,0 +1,181 @@
+﻿@page "/groupsManagement"
+@inject GroupService GroupService
+@inject GroupGroupService GroupGroupService
+
+<h2>Gruppenverwaltung</h2>
+<AuthView Permission="Admin,Groupmanager">
+
+
+    <hr />
+    <div style="max-width:450px">
+        <h3>Neue Gruppe erstellen</h3>
+        <div>
+            <input @bind="newGroupName" placeholder="Gruppenname" />
+            <button @onclick="CreateGroup">Erstellen</button>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <p>@statusMessage</p>
+        }
+
+        <hr />
+        <h3>Alle Gruppen</h3>
+        @if (groups == null)
+        {
+            <p>Lade Gruppen...</p>
+        }
+        else
+        {
+            <table class="table table-bordered table-secondary table-hover">
+                <thead>
+                    <tr>
+                        <th>Gruppe</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var group in groups)
+                    {
+                        <tr>
+                            <td>@group.Name</td>
+                            <td>
+                                <AuthView Permission="Admin">
+                                    <button @onclick="() => DeleteGroup(group.Id)">Löschen</button>
+                                </AuthView>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <hr />
+        <h3>Gruppen verknüpfen</h3>
+        <table class="table table-bordered table-hover table-secondary">
+            <tbody>
+                <tr>
+                    <td>Übergeordnete Gruppe:</td>
+                    <td>
+                        <select @bind="selectedParentId">
+                            <option value="0">--bitte auswählen--</option>
+                            @foreach (var g in groups)
+                            {
+                                <option value="@g.Id">@g.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Untergeordnete Gruppe:</td>
+                    <td>
+                        <select @bind="selectedChildId">
+                            <option value="0">--bitte auswählen--</option>
+
+                            @foreach (var g in groups)
+                            {
+                                <option value="@g.Id">@g.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button @onclick="LinkGroups">Verknüpfen</button>
+
+        @if (!string.IsNullOrEmpty(linkMessage))
+        {
+            <p>@linkMessage</p>
+        }
+
+        <hr />
+        <h3>Bestehende Verknüpfungen</h3>
+        @if (relations.Any())
+        {
+            <table class="table table-hover table-secondary table-bordered">
+                <thead>
+                    <tr>
+                        <th>Übergeordnet</th>
+                        <th>Untergeordnet</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rel in relations)
+                    {
+                        <tr>
+                            <td>@rel.ParentGroup.Name</td>
+                            <td>@rel.ChildGroup.Name</td>
+                            <td>
+                                <button @onclick="() => RemoveLink(rel.ParentGroupId, rel.ChildGroupId)">Entfernen</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p style="color:gray;">Keine Verknüpfungen vorhanden.</p>
+        }
+    </div>
+</AuthView>
+
+@code {
+    private List<Group> groups = new List<Group>();
+    private List<GroupGroup> relations = new List<GroupGroup>();
+
+    private string newGroupName;
+    private string statusMessage;
+    private string linkMessage;
+
+    private int selectedParentId;
+    private int selectedChildId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        groups = await GroupService.GetAllGroupsAsync();
+        relations = await GroupGroupService.GetAllGroupRelationsAsync();
+    }
+
+    private async Task CreateGroup()
+    {
+        if (string.IsNullOrWhiteSpace(newGroupName)) return;
+
+        var group = new Group { Name = newGroupName };
+        await GroupService.AddGroupAsync(group);
+        statusMessage = $"Gruppe '{newGroupName}' wurde erstellt.";
+        newGroupName = "";
+        await LoadData();
+    }
+
+    private async Task DeleteGroup(int id)
+    {
+        await GroupService.DeleteGroupAsync(id);
+        await LoadData();
+    }
+
+    private async Task LinkGroups()
+    {
+        if (selectedParentId == selectedChildId)
+        {
+            linkMessage = "Eine Gruppe kann nicht mit sich selbst verknüpft werden.";
+            return;
+        }
+
+        await GroupGroupService.AddGroupRelationAsync(selectedParentId, selectedChildId);
+        linkMessage = "Verknüpft.";
+        await LoadData();
+    }
+
+    private async Task RemoveLink(int parentId, int childId)
+    {
+        await GroupGroupService.RemoveGroupRelationAsync(parentId, childId);
+        await LoadData();
+    }
+}

@@ -1,0 +1,146 @@
+﻿@page "/usermanagement"
+
+@inject NavigationManager NavManager
+@inject UserService UserService
+
+<h2>Benutzerverwaltung</h2>
+
+<hr />
+<h3>Neuen Benutzer anlegen</h3>
+<input @bind="newUserName" placeholder="Benutzername" />
+<button @onclick="CreateUser">Anlegen</button>
+
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <p>@statusMessage</p>
+}
+
+<hr />
+<h3>Alle Benutzer</h3>
+@if (users == null)
+{
+    <p>Lade Benutzer...</p>
+}
+else if (!users.Any())
+{
+    <p>Keine Benutzer vorhanden.</p>
+}
+else
+{
+    <div style="max-width:450px">
+
+        <table class="table table-bordered table-hover table-secondary">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <AuthView Permission="Admin, Usermanager">
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>
+                            @if (editUserId == user.Id)
+                            {
+                                <input @bind="editUserName" class="form-control" />
+                            }
+                            else
+                            {
+                                @user.Name
+                            }
+                        </td>
+                        <td>
+                            @if (editUserId == user.Id)
+                            {
+                                <button class="btn btn-success btn-sm me-1" @onclick="()=> SaveEdit(user.Id)">Speichern</button>
+                                <button class="btn btn-secondary btn-sm" @onclick="CancelEdit">Abbrechen</button>
+                            }
+                            else
+                            {
+                                    <button class="btn btn-sm btn-info" @onclick="()=> ShowDetails(user.Id)">Details</button>
+                                    <button class="btn btn-sm btn-primary" @onclick="()=> BeginEdit(user)">Bearbeiten</button>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Löschen</button>
+                            }
+                        </td>
+                    </tr>
+                }
+                                </AuthView>
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int userId { get; set; }
+
+    private int? editUserId = null;
+    private string editUserName = string.Empty;
+
+    private List<User> users = new List<User>();
+    private string newUserName = string.Empty;
+    private string statusMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await UserService.GetAllUsersAsync();
+    }
+
+    private async Task CreateUser()
+    {
+        if (string.IsNullOrWhiteSpace(newUserName)) return;
+
+        var user = new User { Name = newUserName.Trim() };
+        await UserService.AddOrEditUserAsync(user);
+        statusMessage = $"Benutzer '{newUserName}' wurde angelegt.";
+        newUserName = "";
+        await LoadUsers();
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        await UserService.DeleteUserAsync(userId);
+        await LoadUsers();
+    }
+
+    private void ShowDetails(int userId)
+    {
+        NavManager.NavigateTo($"/users/details/{userId}");
+    }
+
+    private void BeginEdit(User user)
+    {
+        editUserId = user.Id;
+        editUserName = user.Name;
+    }
+
+    private void CancelEdit()
+    {
+        editUserId = null;
+        editUserName = string.Empty;
+    }
+
+    private async Task SaveEdit(int userId)
+    {
+        var user = await UserService.GetUserByIdAsync(userId);
+        if (user != null && !string.IsNullOrWhiteSpace(editUserName))
+        {
+            user.Name = editUserName.Trim();
+            await UserService.AddOrEditUserAsync(user);
+            statusMessage = $"Benutzer '{user.Name}' wurde aktualisiert.";
+        }
+
+        editUserId = null;
+        editUserName = string.Empty;
+        await LoadUsers();
+    }
+}

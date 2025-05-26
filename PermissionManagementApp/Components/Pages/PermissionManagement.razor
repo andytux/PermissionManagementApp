@@ -1,0 +1,306 @@
+﻿@page "/permissionmanagement"
+@inject PermissionService PermissionService
+@inject UserService UserService
+@inject GroupService GroupService
+@inject UserPermissionService UserPermissionService
+@inject GroupPermissionService GroupPermissionService
+
+<h2>Permission Management</h2>
+<AuthView Permission="Admin">
+    <div style="max-width: 450px">
+
+        <hr />
+        <h3>Neue Berechtigung erstellen</h3>
+        <input @bind="newPermissionName" placeholder="Berechtigungsname" />
+        <button @onclick="AddPermission">Erstellen</button>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p>@message</p>
+        }
+
+        <hr />
+        <h3>Alle Berechtigungen</h3>
+        @if (permissions == null)
+        {
+            <p>Lade Berechtigungen...</p>
+        }
+        else if (!permissions.Any())
+        {
+            <p>Keine vorhanden.</p>
+        }
+        else
+        {
+
+            <table class="table table-hover table-bordered table-secondary">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var permission in permissions)
+                    {
+                        <tr>
+                            <td>@permission.Name</td>
+                            <td>
+                                <button @onclick="() => DeletePermission(permission.Id)">Löschen</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <hr />
+        <h3>Berechtigungen zuweisen</h3>
+
+        <div>
+            <table class="table table-hover table-bordered table-secondary">
+                <tbody>
+                    <tr>
+                        <td>User auswählen:</td>
+                        <td>
+                            <select @bind="selectedUserId">
+                                <option value="0">-- wählen --</option>
+                                @foreach (var user in users)
+                                {
+                                    <option value="@user.Id">@user.Name</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Gruppe auswählen:</td>
+                        <td>
+                            <select @bind="selectedGroupId">
+                                <option value="0">-- wählen --</option>
+                                @foreach (var group in groups)
+                                {
+                                    <option value="@group.Id">@group.Name</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Permission auswählen:</td>
+                        <td>
+                            <select @bind="selectedPermissionId">
+                                <option value="">-- wählen --</option>
+                                @foreach (var p in permissions)
+                                {
+                                    <option value="@p.Id">@p.Name</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <button @onclick="AssignPermission">Zuweisen</button>
+        </div>
+
+
+        @if (!string.IsNullOrEmpty(assignMessage))
+        {
+            <p>@assignMessage</p>
+        }
+
+        <hr />
+        <h3>Alle User mit Permissions</h3>
+        <table class="table table-bordered table-hover table-secondary">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Permissions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    var permissions = userPermissions.ContainsKey(user.Id) ? userPermissions[user.Id] : new List<Permission>();
+
+                    if (permissions.Any())
+                    {
+                        bool firstRow = true;
+                        foreach (var p in permissions)
+                        {
+                            <tr>
+                                @if (firstRow)
+                                {
+                                    <td rowspan="@permissions.Count">@user.Name</td>
+                                    firstRow = false;
+                                }
+                                <td>@p.Name</td>
+                                <td>
+                                    <button @onclick="() => RemovePermissionFromUser(user.Id, p.Id)">
+                                        Entfernen
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>@user.Name</td>
+                            <td>Keine</td>
+                            <td></td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+
+        <hr />
+        <h3>Alle Gruppen mit Permissions</h3>
+        <table class="table table-bordered table-hover table-secondary">
+            <thead>
+                <tr>
+                    <th>Gruppe</th>
+                    <th>Permissions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in groups)
+                {
+                    var permissions = groupPermissions.ContainsKey(group.Id) ? groupPermissions[group.Id] : new List<Permission>();
+
+                    if (permissions.Any())
+                    {
+                        bool firstRow = true;
+                        foreach (var p in permissions)
+                        {
+                            <tr>
+                                @if (firstRow)
+                                {
+                                    <td rowspan="@permissions.Count">@group.Name</td>
+                                    firstRow = false;
+                                }
+                                <td>@p.Name</td>
+                                <td>
+                                    <button @onclick="() => RemovePermissionFromGroup(group.Id, p.Id)">
+                                        Entfernen
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>@group.Name</td>
+                            <td><em>Keine</em></td>
+                            <td></td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</AuthView>
+
+@code {
+    private List<Permission> permissions = new List<Permission>();
+    private List<User> users = new List<User>();
+    private List<Group> groups = new List<Group>();
+
+    private int selectedUserId;
+    private int selectedGroupId;
+    private int selectedPermissionId;
+
+    private string newPermissionName;
+    private string message;
+    private string assignMessage;
+
+    private Dictionary<int, List<Permission>> userPermissions = new Dictionary<int, List<Permission>>();
+    private Dictionary<int, List<Permission>> groupPermissions = new Dictionary<int, List<Permission>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAll();
+    }
+
+    private async Task LoadAll()
+    {
+        permissions = await PermissionService.GetAllPermissionsAsync();
+        users = await UserService.GetAllUsersAsync();
+        groups = await GroupService.GetAllGroupsAsync();
+
+        userPermissions.Clear();
+
+        foreach (var user in users)
+        {
+            var perms = await UserPermissionService.GetUserPermissionsAsync(user.Id);
+            userPermissions[user.Id] = perms;
+        }
+
+        groupPermissions.Clear();
+        foreach (var group in groups)
+        {
+            var perms = await GroupPermissionService.GetGroupPermissionsAsync(group.Id);
+            groupPermissions[group.Id] = perms;
+        }
+    }
+
+    private async Task AddPermission()
+    {
+        if (string.IsNullOrWhiteSpace(newPermissionName)) return;
+
+        await PermissionService.AddPermissionAsync(new Permission { Name = newPermissionName });
+        message = $"Berechtigung '{newPermissionName}' wurde erstellt.";
+        newPermissionName = string.Empty;
+        await LoadAll();
+    }
+
+    private async Task DeletePermission(int id)
+    {
+        await PermissionService.DeletePermissionAsync(id);
+        await LoadAll();
+    }
+
+    private async Task AssignPermission()
+    {
+        if (selectedPermissionId == 0)
+        {
+            assignMessage = "Bitte eine Permission auswählen.";
+            return;
+        }
+
+        if (selectedUserId != 0)
+        {
+            await UserPermissionService.AssignPermissionToUserAsync(selectedUserId, selectedPermissionId);
+            assignMessage = "Permission dem User zugewiesen.";
+        }
+        else if (selectedGroupId != 0)
+        {
+            await GroupPermissionService.AssignPermissionToGroupAsync(selectedGroupId, selectedPermissionId);
+            assignMessage = "Permission der Gruppe zugewiesen.";
+        }
+        else
+        {
+            assignMessage = "Bitte zuerst User oder Gruppe auswählen.";
+            return;
+        }
+
+        await LoadAll();
+    }
+
+    private async Task RemovePermissionFromUser(int userId, int permissionId)
+    {
+        await UserPermissionService.RemovePermissionFromUserAsync(userId, permissionId);
+        await LoadAll();
+    }
+
+    private async Task RemovePermissionFromGroup(int groupId, int permissionId)
+    {
+        await GroupPermissionService.RemovePermissionFromGroupAsync(groupId, permissionId);
+        await LoadAll();
+    }
+
+}

@@ -1,0 +1,101 @@
+﻿@page "/users/details/{UserId:int}"
+
+@inject UserService UserService
+@inject UserGroupService UserGroupService
+@inject RoleService RoleService
+@inject NavigationManager Nav
+
+<h2>Benutzerdetails</h2>
+
+@if (user == null)
+{
+    <p>Lade Daten...</p>
+}
+else
+{
+    <div style="margin-bottom:20px; max-width:450px">
+        <h3>@user.Name</h3>
+
+        <table class="table table-bordered table-secondary table-hover">
+            <thead>
+                <tr>
+                    <th>Direkte Gruppen:</th>
+                </tr>
+            </thead>
+            @if (userGroups.Any())
+            {
+
+                <tbody>
+                    @foreach (var group in userGroups)
+                    {
+                        <tr>
+                            <td>
+                                @group.Name
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            }
+            else
+            {
+                <tr>
+                    <td>
+                        Keine Gruppenmitgliedschaften
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <table class="table table-bordered table-secondary table-hover">
+            <thead>
+                <tr>
+                    <th>Alle Berechtigungen (inkl. Gruppen):</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @if (permissions.Any())
+                {
+
+                    @foreach (var permission in permissions)
+                    {
+                        <tr>
+                            <td>@permission.Name</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td>
+                            Keine Berechtigungen
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <button @onclick="GoBack">Zurück</button>
+}
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+
+    private User? user;
+    private List<Group> userGroups = new();
+    private List<Permission> permissions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserService.GetUserByIdAsync(UserId);
+        userGroups = await UserGroupService.GetUserGroupsAsync(UserId);
+        permissions = await RoleService.GetUserPermissionsRecursiveAsync(UserId);
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/usermanagement");
+    }
+}

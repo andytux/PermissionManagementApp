@@ -1,6 +1,8 @@
 ﻿@page "/login"
 
 @inject AuthService AuthService
+@inject AuthStateService AuthStateService
+@inject UserService UserService
 @inject NavigationManager NavManager
 
 
@@ -11,24 +13,31 @@
 
 @if (loginFailed)
 {
-	<p style="color:red;">Login failed! User does not exist.</p>
+    <p style="color:red;">Login failed! User does not exist.</p>
 }
 
 @code {
-	private string userName = string.Empty;
-	private bool loginFailed = false;
+    private string userName = string.Empty;
+    private bool loginFailed = false;
 
-	private async Task LoginWithRole()
-	{
-		if (await AuthService.LoginAsync(userName))
-		{
-			NavManager.NavigateTo("/");
-		}
-		else
-		{
-			loginFailed = true;
-		}
-	}
+    private async Task LoginWithRole()
+    {
+        var user = await UserService.GetUserByNameAsync(userName);
+        if (user != null)
+        {
+
+            if (await AuthService.LoginAsync(userName))
+            {
+                await AuthStateService.Login(user.Name, user.Id);
+
+        NavManager.NavigateTo("/");
+            }
+            else
+            {
+                loginFailed = true;
+            }
+        }
+    }
 
 
 }
